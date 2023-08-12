@@ -1,6 +1,6 @@
 import pandas as pd
 from load_csv import load_csv
-import calendar
+import datetime
 #pip install openpyxl
 
 # TODO Header mit Soll Uhrzeiten fürs Dataframe in CSV auslagern die man Einlesenkann oder in ander constants python ist glaube ich ebser
@@ -9,17 +9,15 @@ EXCEL_FILENAME = 'output.xlsx'
 CSV_FILENAME = "SB56_t30.csv"
 #Month to be filtered 01-12
 MONTH = 7
-YEAR = '2023'
+YEAR = 2023
 
 pd.set_option('display.max_columns', None)
 
-def format_day(day_int: int):
-    return f'{day_int:02}'
+def generate_dates(year, month):
+    num_days = (datetime.date(year, month + 1, 1) - datetime.date(year, month, 1)).days
+    dates = [datetime.date(year, month, day).strftime('%d-%m-%Y') for day in range(1, num_days + 1)]
+    return dates
 
-def get_all_dates(year, month):
-    num_days = calendar.monthrange(year, month)[1]
-    all_dates = [f"{year}-{month:02d}-{day:02d}" for day in range(1, num_days + 1)]
-    return all_dates
 def monatsauswertung():
     # CSV in DataFrame laden und auf angegebenen Monat filtern.
     data = load_csv(CSV_FILENAME)
@@ -40,8 +38,10 @@ def monatsauswertung():
     for index_day_in_month in range(1,32):
         date_day = pd.to_datetime(f'2023-{MONTH:02d}-{index_day_in_month:02d}')
         df_thisDay = df_csv[(df_csv['Datum'] == date_day)]
+        df_thisDay = df_thisDay.copy() # Verhindert eine Warnung die durch die beiden folgenden Zeilen sonst entstehen würden.
         df_thisDay['Ist'] = df_thisDay['Ist'].dt.strftime('%H:%M')
         df_thisDay['Soll'] = df_thisDay['Soll'].dt.strftime('%H:%M')
+        print(df_thisDay.head())
         df_thisDay = df_thisDay.sort_values(by='Soll')
         df_thisDay = df_thisDay.reset_index(drop=True)
         index_df_thisDay = 0
@@ -49,16 +49,11 @@ def monatsauswertung():
             for time_day in range(0,32):
                 if not index_df_thisDay >= len(df_thisDay):
                     if df_auswertung.columns[time_day] == df_thisDay.loc[index_df_thisDay,'Soll']:
-                        df_auswertung.iloc[index_day_in_month,time_day] = df_thisDay.loc[index_df_thisDay, 'Verspaetung']
+                        df_auswertung.iloc[index_day_in_month-1,time_day] = df_thisDay.loc[index_df_thisDay, 'Verspaetung']
                         index_df_thisDay += 1
-
-
-
- #   arra = get_all_dates(int(YEAR), int(MONTH))
-  #  new_column = pd.Series(arra, name='Country')
-   # df_auswertung.insert(0, 'Datum', new_column)
-
-
+    array = generate_dates(YEAR, MONTH)
+    new_column = pd.Series(array, name='Datum')
+    df_auswertung.insert(0, 'Datum', new_column)
 
     df_auswertung.to_excel(EXCEL_FILENAME, index=False)
 
