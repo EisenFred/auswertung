@@ -7,7 +7,6 @@ import settings as s
 
 # Spalte vor das Datum mit dem Wochentag
 
-
 def generate_dates(year, month):
     num_days = (datetime.date(year, month + 1, 1) - datetime.date(year, month, 1)).days
     dates = [datetime.date(year, month, day).strftime('%d-%m-%Y') for day in range(1, num_days + 1)]
@@ -77,8 +76,3 @@ def monatsauswertung():
     workbook.save(s.EXCEL_FILENAME)
 
 monatsauswertung()
-
-
-
-
-
