@@ -1,12 +1,27 @@
+import csv
 import pandas as pd
 from openpyxl.styles import PatternFill
-from load_csv import load_csv
 import datetime
 import openpyxl
 import settings as s
 
 # Spalte vor das Datum mit dem Wochentag
-
+def load_csv(filename):
+    array = []
+    try:
+        with open(filename, 'r') as csvFile:
+            csv_reader = csv.reader(csvFile)
+            for row in csv_reader:
+                array.append(row)
+    except FileNotFoundError as e:
+        print("\033[93m⫷WARNING⫸\033[0m Leeres Array wurde erstellt. <FileNotFoundError> \033[93m⫷WARNING⫸\033[0m")
+    except PermissionError as e:
+        print("\033[93m⫷WARNING⫸\033[0m Leeres Array wurde erstellt. <PermissionError> \033[93m⫷WARNING⫸\033[0m")
+    except UnicodeDecodeError as e:
+        print("\033[93m⫷WARNING⫸\033[0m Leeres DataFrame wurde erstellt. <UnicodeDecodeError> \033[93m⫷WARNING⫸\033[0m")
+    except csv.Error as e:
+        print("\033[93m⫷WARNING⫸\033[0m Leeres DataFrame wurde erstellt. <csv.Error> \033[93m⫷WARNING⫸\033[0m")
+    return array
 def generate_dates(year, month):
     num_days = (datetime.date(year, month + 1, 1) - datetime.date(year, month, 1)).days
     dates = [datetime.date(year, month, day).strftime('%d-%m-%Y') for day in range(1, num_days + 1)]
