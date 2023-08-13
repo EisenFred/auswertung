@@ -1,9 +1,13 @@
 import csv
-import pandas as pd
-from openpyxl.styles import PatternFill
 import datetime
+
 import openpyxl
+import pandas as pd
+from PIL import Image, ImageDraw, ImageFont
+from openpyxl.styles import PatternFill
+
 import settings as s
+
 
 # Spalte vor das Datum mit dem Wochentag
 def load_csv(filename):
@@ -18,9 +22,9 @@ def load_csv(filename):
     except PermissionError as e:
         print("\033[93m⫷WARNING⫸\033[0m Leeres Array wurde erstellt. <PermissionError> \033[93m⫷WARNING⫸\033[0m")
     except UnicodeDecodeError as e:
-        print("\033[93m⫷WARNING⫸\033[0m Leeres DataFrame wurde erstellt. <UnicodeDecodeError> \033[93m⫷WARNING⫸\033[0m")
+        print("\033[93m⫷WARNING⫸\033[0m Leeres Array wurde erstellt. <UnicodeDecodeError> \033[93m⫷WARNING⫸\033[0m")
     except csv.Error as e:
-        print("\033[93m⫷WARNING⫸\033[0m Leeres DataFrame wurde erstellt. <csv.Error> \033[93m⫷WARNING⫸\033[0m")
+        print("\033[93m⫷WARNING⫸\033[0m Leeres Array wurde erstellt. <csv.Error> \033[93m⫷WARNING⫸\033[0m")
     return array
 def generate_dates(year, month):
     num_days = (datetime.date(year, month + 1, 1) - datetime.date(year, month, 1)).days
@@ -88,6 +92,8 @@ def monatsauswertung():
                 cell.fill = PatternFill(start_color=s.COLOR5, end_color=s.COLOR5, fill_type='solid')
             if cell.value is not None and cell.value >= 10:
                 cell.fill = PatternFill(start_color=s.COLOR6, end_color=s.COLOR6, fill_type='solid')
+            if cell.value is None:
+                cell.fill = PatternFill(start_color= 'FFFFFF', end_color= 'FFFFFF', fill_type='solid')
     workbook.save(s.EXCEL_FILENAME)
 
 monatsauswertung()
