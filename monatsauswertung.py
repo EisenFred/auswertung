@@ -1,11 +1,8 @@
 import csv
 import datetime
-
 import openpyxl
 import pandas as pd
-from PIL import Image, ImageDraw, ImageFont
 from openpyxl.styles import PatternFill
-
 import settings as s
 
 
@@ -26,6 +23,7 @@ def load_csv(filename):
     except csv.Error as e:
         print("\033[93m⫷WARNING⫸\033[0m Leeres Array wurde erstellt. <csv.Error> \033[93m⫷WARNING⫸\033[0m")
     return array
+
 def generate_dates(year, month):
     num_days = (datetime.date(year, month + 1, 1) - datetime.date(year, month, 1)).days
     dates = [datetime.date(year, month, day).strftime('%d-%m-%Y') for day in range(1, num_days + 1)]
@@ -96,4 +94,5 @@ def monatsauswertung():
                 cell.fill = PatternFill(start_color= 'FFFFFF', end_color= 'FFFFFF', fill_type='solid')
     workbook.save(s.EXCEL_FILENAME)
 
-monatsauswertung()
+if __name__ == "__main__":
+    monatsauswertung()
