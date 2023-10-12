@@ -4,24 +4,29 @@ import openpyxl
 import pandas as pd
 from openpyxl.styles import PatternFill
 import settings as s
+import os
 
+cwd = os.getcwd()  # Get the current working directory (cwd)
+files = os.listdir(cwd)  # Get all the files in that directory
+print("Files in %r: %s" % (cwd, files))
 
 # Spalte vor das Datum mit dem Wochentag
 def load_csv(filename):
-    array = []
+    array = [] 
     try:
         with open(filename, 'r') as csvFile:
             csv_reader = csv.reader(csvFile)
             for row in csv_reader:
                 array.append(row)
     except FileNotFoundError as e:
-        print("\033[93m⫷WARNING⫸\033[0m Leeres Array wurde erstellt. <FileNotFoundError> \033[93m⫷WARNING⫸\033[0m")
+        print("\033[93m⫷ WARNING⫸\033[0m Leeres Array wurde erstellt. <FileNotFoundError> \033[93m⫷ WARNING⫸\033[0m")
+        print(e.strerror)
     except PermissionError as e:
-        print("\033[93m⫷WARNING⫸\033[0m Leeres Array wurde erstellt. <PermissionError> \033[93m⫷WARNING⫸\033[0m")
+        print("\033[93m⫷ WARNING⫸\033[0m Leeres Array wurde erstellt. <PermissionError> \033[93m⫷ WARNING⫸\033[0m")
     except UnicodeDecodeError as e:
-        print("\033[93m⫷WARNING⫸\033[0m Leeres Array wurde erstellt. <UnicodeDecodeError> \033[93m⫷WARNING⫸\033[0m")
+        print("\033[93m⫷ WARNING⫸\033[0m Leeres Array wurde erstellt. <UnicodeDecodeError> \033[93m⫷ WARNING⫸\033[0m")
     except csv.Error as e:
-        print("\033[93m⫷WARNING⫸\033[0m Leeres Array wurde erstellt. <csv.Error> \033[93m⫷WARNING⫸\033[0m")
+        print("\033[93m⫷ WARNING⫸\033[0m Leeres Array wurde erstellt. <csv.Error> \033[93m⫷ WARNING⫸\033[0m")
     return array
 
 def generate_dates(year, month):
@@ -37,14 +42,25 @@ def monatsauswertung():
     df_csv['Ist'] = pd.to_datetime(df_csv['Ist'], format='%H:%M')
     df_csv['Datum'] = pd.to_datetime(df_csv['Datum'], format='%d.%m.%Y', dayfirst=True)
     start_date = pd.to_datetime(f'2023-{s.MONTH:02d}-01')
-    end_date = pd.to_datetime(f'2023-{s.MONTH:02d}-31')
+    if any(s.MONTH == item for item in [1,3,5,7,8,10,12]):
+        end_date = pd.to_datetime(f'2023-{s.MONTH:02d}-31')
+    elif s.MONTH == 2:
+        end_date = pd.to_datetime(f'2023-{s.MONTH:02d}-28')
+    else:
+        end_date = pd.to_datetime(f'2023-{s.MONTH:02d}-30')
     df_csv = df_csv[(df_csv['Datum'] >= start_date) & (df_csv['Datum'] <= end_date)]
 
     rows = 32
     columns2 = ['07:16','07:46','08:16','08:46','09:16','09:46','10:16','10:46','11:16','11:46','12:16','12:46','13:16','13:46','14:16','14:46','15:16','15:46','16:16','16:46','17:16','17:46','18:16','18:46','19:16','19:46','20:16','20:46','21:16','21:46','22:16','22:46',]
     df_auswertung = pd.DataFrame(index=range(rows), columns=columns2)
 
-    for index_day_in_month in range(1,32):
+    if any(s.MONTH == item for item in [1,3,5,7,8,10,12]):
+        range_limit = 32
+    elif s.MONTH == 2:
+        range_limit = 29
+    else:
+        range_limit = 31
+    for index_day_in_month in range(1,range_limit):
         date_day = pd.to_datetime(f'2023-{s.MONTH:02d}-{index_day_in_month:02d}')
         df_thisDay = df_csv[(df_csv['Datum'] == date_day)]
         df_thisDay = df_thisDay.copy() # Verhindert eine Warnung die durch die beiden folgenden Zeilen sonst entstehen würden.
@@ -94,5 +110,6 @@ def monatsauswertung():
                 cell.fill = PatternFill(start_color= 'FFFFFF', end_color= 'FFFFFF', fill_type='solid')
     workbook.save(s.EXCEL_FILENAME)
 
+print(__name__)
 if __name__ == "__main__":
     monatsauswertung()
